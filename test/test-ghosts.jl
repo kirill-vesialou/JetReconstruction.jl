@@ -1,17 +1,15 @@
 include("common.jl")
 
-import JetReconstruction: GhostGeneration
-
 @testset "Ghost Creation Tests" begin
     resolution = 1000
     gen = GhostedArea(resolution)
 
     # Create original event with preexisting PseudoJets
     event = [
-        PseudoJet(pt = 1.1, rap = 1.0, phi = 1.3),
-        PseudoJet(pt = 2.4, rap = 3.2, phi = 0.8),
-        PseudoJet(pt = 0.9, rap = 0.5, phi = 3.0),
-        PseudoJet(pt = 0.4, rap = 6.0, phi = 5.2)
+        PseudoJet(1.1, 1.0, 1.3, 1.2),
+        PseudoJet(2.4, 3.2, 0.8, 1.7),
+        PseudoJet(0.9, 0.5, 3.0, 4.3),
+        PseudoJet(0.9, 6.0, 5.2, 0.4)
     ]
     num_original = length(event)
 
@@ -22,12 +20,12 @@ import JetReconstruction: GhostGeneration
     num_ghosts = resolution * resolution
     @test length(event) == num_original + num_ghosts
 
-    # # Ensure that the original jets have not changed
-    # @test event[1].pt == 1.1
-    # @test event[2].rap == 3.2
-    # @test event[3].phi == 3.0
-    # @test event[4].pt == 0.4
+    # Ensure that the original jets have not changed
+    @test event[1].px == 1.1
+    @test event[2].py == 3.2
+    @test event[3].pz == 3.0
+    @test event[4].E == 0.4
 
-    # # Check that all added ghosts have the correct pt
-    # @test all(i -> i.pt == 1.0f-45, event[n_original+1:end])
+    # Check that all added ghosts have the correct pt, use an error bound due to floating point error
+    @test all(i -> i._pt2 - 1.0e-90 <= 1.0e-89, event[num_original+1:end])
 end
